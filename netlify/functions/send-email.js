@@ -21,12 +21,16 @@ exports.handler = async (event) => {
     }
 
     // Get environment variables
-    const POSTMARK_API_KEY = process.env.POSTMARK_API_KEY;
+    const POSTMARK_API_KEY = process.env.POST_MARK_API;
     const TO_EMAIL = process.env.TO_EMAIL; // Comma-separated emails
     const FROM_EMAIL = process.env.FROM_EMAIL;
 
     if (!POSTMARK_API_KEY || !TO_EMAIL || !FROM_EMAIL) {
-      console.error('Missing environment variables');
+      console.error('Missing environment variables', {
+        hasPostmark: !!POSTMARK_API_KEY,
+        hasToEmail: !!TO_EMAIL,
+        hasFromEmail: !!FROM_EMAIL
+      });
       return {
         statusCode: 500,
         body: JSON.stringify({ error: 'Server configuration error' })

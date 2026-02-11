@@ -40,7 +40,7 @@ npm run build
 
 Configure these environment variables in your Netlify dashboard under **Site settings > Environment variables**:
 
-- `POSTMARK_API_KEY` - Your Postmark server API token
+- `POST_MARK_API` - Your Postmark server API token
 - `FROM_EMAIL` - The verified sender email address (e.g., noreply@yourdomain.com)
 - `TO_EMAIL` - Recipient email addresses, comma-separated (e.g., sales@autosync360.com,info@autosync360.com)
 
