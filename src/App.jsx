@@ -91,6 +91,8 @@ export default function App() {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [form, setForm] = useState({ firstName: "", company: "", phone: "", email: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 60);
@@ -99,6 +101,36 @@ export default function App() {
   }, []);
 
   const scrollTo = (id) => { setMobileMenu(false); document.getElementById(id)?.scrollIntoView({ behavior: "smooth" }); };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/.netlify/functions/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSubmitted(true);
+        setForm({ firstName: "", company: "", phone: "", email: "", message: "" });
+      } else {
+        setError(data.error || 'Failed to send message. Please try again.');
+      }
+    } catch (err) {
+      setError('Failed to send message. Please try again.');
+      console.error('Form submission error:', err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div style={{ fontFamily: "'Montserrat', sans-serif", color: C.dark, background: C.bg, minHeight: "100vh", overflowX: "hidden" }}>
@@ -404,33 +436,83 @@ export default function App() {
                 background: C.bg, borderRadius: 12, padding: 32,
                 border: `1px solid ${C.border}`, boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
               }}>
-                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  {error && (
+                    <div style={{
+                      padding: 12,
+                      background: "#fee",
+                      border: "1px solid #fcc",
+                      borderRadius: 4,
+                      color: "#c33",
+                      fontSize: 14
+                    }}>
+                      {error}
+                    </div>
+                  )}
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
                     <div>
-                      <label style={{ fontSize: 12, fontWeight: 500, color: C.textLight, marginBottom: 6, display: "block" }}>First Name</label>
-                      <input className="as-input" value={form.firstName} onChange={e => setForm({ ...form, firstName: e.target.value })} />
+                      <label style={{ fontSize: 12, fontWeight: 500, color: C.textLight, marginBottom: 6, display: "block" }}>First Name *</label>
+                      <input
+                        className="as-input"
+                        value={form.firstName}
+                        onChange={e => setForm({ ...form, firstName: e.target.value })}
+                        required
+                        disabled={submitting}
+                      />
                     </div>
                     <div>
                       <label style={{ fontSize: 12, fontWeight: 500, color: C.textLight, marginBottom: 6, display: "block" }}>Company Name</label>
-                      <input className="as-input" value={form.company} onChange={e => setForm({ ...form, company: e.target.value })} />
+                      <input
+                        className="as-input"
+                        value={form.company}
+                        onChange={e => setForm({ ...form, company: e.target.value })}
+                        disabled={submitting}
+                      />
                     </div>
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
                     <div>
                       <label style={{ fontSize: 12, fontWeight: 500, color: C.textLight, marginBottom: 6, display: "block" }}>Phone Number</label>
-                      <input className="as-input" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
+                      <input
+                        className="as-input"
+                        value={form.phone}
+                        onChange={e => setForm({ ...form, phone: e.target.value })}
+                        disabled={submitting}
+                      />
                     </div>
                     <div>
-                      <label style={{ fontSize: 12, fontWeight: 500, color: C.textLight, marginBottom: 6, display: "block" }}>Email</label>
-                      <input className="as-input" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+                      <label style={{ fontSize: 12, fontWeight: 500, color: C.textLight, marginBottom: 6, display: "block" }}>Email *</label>
+                      <input
+                        className="as-input"
+                        type="email"
+                        value={form.email}
+                        onChange={e => setForm({ ...form, email: e.target.value })}
+                        required
+                        disabled={submitting}
+                      />
                     </div>
                   </div>
                   <div>
-                    <label style={{ fontSize: 12, fontWeight: 500, color: C.textLight, marginBottom: 6, display: "block" }}>Leave us a message...</label>
-                    <textarea className="as-input" rows={4} value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} style={{ resize: "vertical" }} />
+                    <label style={{ fontSize: 12, fontWeight: 500, color: C.textLight, marginBottom: 6, display: "block" }}>Leave us a message... *</label>
+                    <textarea
+                      className="as-input"
+                      rows={4}
+                      value={form.message}
+                      onChange={e => setForm({ ...form, message: e.target.value })}
+                      style={{ resize: "vertical" }}
+                      required
+                      disabled={submitting}
+                    />
                   </div>
-                  <button className="as-btn-primary" onClick={() => setSubmitted(true)} style={{ width: "100%", textAlign: "center", marginTop: 4 }}>Submit</button>
-                </div>
+                  <button
+                    type="submit"
+                    className="as-btn-primary"
+                    style={{ width: "100%", textAlign: "center", marginTop: 4 }}
+                    disabled={submitting}
+                  >
+                    {submitting ? 'Sending...' : 'Submit'}
+                  </button>
+                </form>
               </div>
             </Fade>
           )}
