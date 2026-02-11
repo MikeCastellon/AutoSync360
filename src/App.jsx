@@ -122,10 +122,15 @@ export default function App() {
         setSubmitted(true);
         setForm({ firstName: "", company: "", phone: "", email: "", message: "" });
       } else {
-        setError(data.error || 'Failed to send message. Please try again.');
+        // Show detailed error for debugging
+        const errorMsg = data.details
+          ? `${data.error}: ${data.details}`
+          : data.error || 'Failed to send message. Please try again.';
+        setError(errorMsg);
+        console.error('Server error:', data);
       }
     } catch (err) {
-      setError('Failed to send message. Please try again.');
+      setError(`Network error: ${err.message}`);
       console.error('Form submission error:', err);
     } finally {
       setSubmitting(false);

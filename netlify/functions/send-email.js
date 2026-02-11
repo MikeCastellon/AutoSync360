@@ -110,11 +110,13 @@ Submitted at: ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York
 
   } catch (error) {
     console.error('Error sending email:', error);
+    console.error('Error stack:', error.stack);
     return {
       statusCode: 500,
       body: JSON.stringify({
         error: 'Failed to send email',
-        details: error.message
+        details: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       })
     };
   }
